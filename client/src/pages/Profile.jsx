@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { User, Trophy, Swords, Star, Edit2, Check } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
+import useMyMatches from '../hooks/useMyMatches';
 import { Avatar } from '../components/tournament/ParticipantList';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -11,7 +12,6 @@ import Input from '../components/ui/Input';
 import StatCard from '../components/dashboard/StatCard';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import { calcWinRate, formatCredits } from '../utils/formatters';
-import { MOCK_MY_MATCHES } from '../utils/mockData';
 
 const BADGE_COLORS = {
   'Campus Champion': 'purple',
@@ -27,6 +27,7 @@ const BADGE_COLORS = {
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
+  const { matches, isLoading } = useMyMatches();
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -112,7 +113,11 @@ const Profile = () => {
             <h2 className="font-display font-semibold text-lg flex items-center gap-2 mb-4">
               <Swords className="w-5 h-5 text-purple-400" /> Match History
             </h2>
-            <ActivityFeed matches={MOCK_MY_MATCHES} />
+            {isLoading ? (
+              <div className="flex justify-center py-6"><div className="w-6 h-6 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" /></div>
+            ) : (
+              <ActivityFeed matches={matches} />
+            )}
           </div>
         </div>
       </div>

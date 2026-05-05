@@ -7,16 +7,17 @@ import {
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import useLobbies from '../hooks/useLobbies';
+import useMyMatches from '../hooks/useMyMatches';
 import StatCard from '../components/dashboard/StatCard';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import LobbyCard from '../components/lobby/LobbyCard';
 import { CardSkeleton, StatSkeleton } from '../components/ui/Skeleton';
 import { formatCredits, calcWinRate } from '../utils/formatters';
-import { MOCK_MY_MATCHES } from '../utils/mockData';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { lobbies, isLoading, fetchLobbies, joinLobby } = useLobbies();
+  const { lobbies, isLoading: isLobbiesLoading, fetchLobbies, joinLobby } = useLobbies();
+  const { matches, isLoading: isMatchesLoading } = useMyMatches();
   const navigate = useNavigate();
 
   useEffect(() => { fetchLobbies(); }, []);
@@ -56,7 +57,7 @@ const Dashboard = () => {
 
         {/* ── Stats grid ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {isLoading && !stats.matchesPlayed ? (
+          {isLobbiesLoading && !stats.matchesPlayed ? (
             Array(4).fill(0).map((_, i) => <StatSkeleton key={i} />)
           ) : (
             <>
@@ -82,7 +83,7 @@ const Dashboard = () => {
               </Link>
             </div>
 
-            {isLoading ? (
+            {isLobbiesLoading ? (
               <div className="grid gap-4">
                 {Array(3).fill(0).map((_, i) => <CardSkeleton key={i} />)}
               </div>
@@ -117,7 +118,11 @@ const Dashboard = () => {
               <Clock className="w-5 h-5 text-cyan-400" /> Recent Activity
             </h2>
             <div className="bg-bg-card border border-white/5 rounded-xl p-4">
-              <ActivityFeed matches={MOCK_MY_MATCHES} />
+              {isMatchesLoading ? (
+                <div className="flex justify-center py-6"><div className="w-6 h-6 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" /></div>
+              ) : (
+                <ActivityFeed matches={matches} />
+              )}
             </div>
 
             {/* Quick actions */}
