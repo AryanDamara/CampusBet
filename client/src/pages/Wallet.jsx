@@ -1,30 +1,23 @@
 import { motion } from 'framer-motion';
-import { Zap, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft, Gift } from 'lucide-react';
+import { Zap, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import useMyMatches from '../hooks/useMyMatches';
-import { formatCredits, formatCreditChange, timeFromNow } from '../utils/formatters';
-
-// Transactions derived from match history
-const buildTransactions = (matches, credits, userCreatedAt) => {
-  const txns = matches.map((m) => ({
-    _id: m._id,
-    type: m.result === 'won' ? 'credit' : 'debit',
-    label: `${m.game} vs ${m.opponent?.name}`,
-    amount: m.creditsChange,
-    date: m.date,
-    icon: m.result === 'won' ? TrendingUp : TrendingDown,
-  }));
-  // Add starter credit
-  txns.push({ _id: 'starter', type: 'credit', label: 'Starter Credits — Welcome bonus', amount: 500, date: userCreatedAt || new Date(Date.now() - 864e5 * 7).toISOString(), icon: Gift });
-  return txns.sort((a, b) => new Date(b.date) - new Date(a.date));
-};
+import { formatCreditChange, timeFromNow } from '../utils/formatters';
 
 const Wallet = () => {
   const { user } = useAuth();
   const { matches, isLoading } = useMyMatches();
-  const transactions = buildTransactions(matches, user?.credits, user?.created_at);
 
-  const totalWon = transactions.filter(t => t.type === 'credit' && t._id !== 'starter').reduce((s, t) => s + t.amount, 0);
+  // Build transactions purely from real Supabase match data
+  const transactions = matches.map((m) => ({
+    _id: m._id,
+    type: m.result === 'won' ? 'credit' : 'debit',
+    label: `${m.game} vs ${m.opponent?.name || 'Unknown'}`,
+    amount: m.creditsChange,
+    date: m.date,
+  })).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const totalWon = transactions.filter(t => t.type === 'credit').reduce((s, t) => s + t.amount, 0);
   const totalSpent = transactions.filter(t => t.type === 'debit').reduce((s, t) => s + Math.abs(t.amount), 0);
 
   return (
