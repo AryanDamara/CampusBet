@@ -1,6 +1,8 @@
-export const APP_NAME = 'CampusBet';
+// ─── App-wide constants ────────────────────────────────────────────────────────
+// This file contains all the shared values used across the app.
+// By keeping them here, we avoid duplicating magic strings/numbers in every file.
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const APP_NAME = 'CampusBet';
 
 export const COLLEGE_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(edu|ac\.in|edu\.in)$/;
 export const COLLEGE_EMAIL_HINT = 'Must be a college-issued email (e.g. .edu or .ac.in)';

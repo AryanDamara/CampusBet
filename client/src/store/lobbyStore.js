@@ -1,7 +1,10 @@
+// Lobby store — handles all lobby data fetching and mutations using Zustand + Supabase.
+// Components never call supabase directly for lobbies; they go through this store.
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
+// Converts a raw Supabase lobby row into the shape the UI expects
 const mapLobby = (dbLobby) => {
   if (!dbLobby) return null;
   return {
@@ -15,8 +18,14 @@ const mapLobby = (dbLobby) => {
     maxPlayers: dbLobby.max_players,
     status: dbLobby.status,
     createdAt: dbLobby.created_at,
-    currentPlayers: dbLobby.lobby_players ? dbLobby.lobby_players.map(p => p.user_id) : [],
-    winnerId: dbLobby.winner_id
+    scheduledAt: dbLobby.scheduled_at,
+    description: dbLobby.description,
+    // Array of user IDs currently in the lobby
+    currentPlayers: dbLobby.lobby_players ? dbLobby.lobby_players.map((p) => p.user_id) : [],
+    // Raw lobby_players with nested profile data — used in LobbyDetail to show real names
+    lobby_players: dbLobby.lobby_players || [],
+    winnerId: dbLobby.winner_id,
+    spectatorBids: dbLobby.spectator_bids || [],
   };
 };
 
@@ -29,11 +38,11 @@ const useLobbyStore = create((set, get) => ({
 
   setFilters: (filters) => set((s) => ({ filters: { ...s.filters, ...filters } })),
 
+  // Fetch all lobbies, applying any active filters (game, status, search text)
   fetchLobbies: async () => {
     set({ isLoading: true, error: null });
     try {
       const { filters } = get();
-      
       let query = supabase
         .from('lobbies')
         .select(`
@@ -43,7 +52,7 @@ const useLobbyStore = create((set, get) => ({
         `)
         .order('created_at', { ascending: false });
 
-      if (filters.game) query = query.eq('game', filters.game);
+      if (filters.game)   query = query.eq('game', filters.game);
       if (filters.status) query = query.eq('status', filters.status);
       if (filters.search) query = query.ilike('title', `%${filters.search}%`);
 
@@ -58,6 +67,7 @@ const useLobbyStore = create((set, get) => ({
     }
   },
 
+  // Fetch a single lobby by ID — includes player profiles for the detail page
   fetchLobbyById: async (id) => {
     set({ isLoading: true, currentLobby: null, error: null });
     try {
@@ -81,23 +91,22 @@ const useLobbyStore = create((set, get) => ({
     }
   },
 
+  // Create a new lobby and auto-add the host as the first player
   createLobby: async (formData) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('You must be logged in to create a lobby');
 
-      const newLobbyData = {
-        title: formData.title,
-        game: formData.game,
-        bid_amount: parseInt(formData.bidAmount) || 0,
-        max_players: parseInt(formData.maxPlayers) || 2,
-        host_id: session.user.id,
-        status: 'open'
-      };
-
       const { data, error } = await supabase
         .from('lobbies')
-        .insert(newLobbyData)
+        .insert({
+          title: formData.title,
+          game: formData.game,
+          bid_amount: parseInt(formData.bidAmount) || 0,
+          max_players: parseInt(formData.maxPlayers) || 2,
+          host_id: session.user.id,
+          status: 'open',
+        })
         .select(`
           *,
           host:profiles!lobbies_host_id_fkey(id, name, avatar_url, college),
@@ -107,10 +116,11 @@ const useLobbyStore = create((set, get) => ({
 
       if (error) throw error;
 
+      // Add the host as the first player in the lobby
       await supabase.from('lobby_players').insert({
         lobby_id: data.id,
         user_id: session.user.id,
-        status: 'ready'
+        status: 'ready',
       });
 
       toast.success('Lobby created! 🎮');
@@ -122,18 +132,17 @@ const useLobbyStore = create((set, get) => ({
     }
   },
 
+  // Join an existing lobby — 23505 means the user is already in it
   joinLobby: async (lobbyId) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('You must be logged in to join');
 
-      const { error } = await supabase
-        .from('lobby_players')
-        .insert({
-          lobby_id: lobbyId,
-          user_id: session.user.id,
-          status: 'ready'
-        });
+      const { error } = await supabase.from('lobby_players').insert({
+        lobby_id: lobbyId,
+        user_id: session.user.id,
+        status: 'ready',
+      });
 
       if (error) {
         if (error.code === '23505') throw new Error('You are already in this lobby!');
@@ -149,22 +158,23 @@ const useLobbyStore = create((set, get) => ({
     }
   },
 
+  // Mark a lobby as completed and record the winner
   submitResult: async (lobbyId, data) => {
     try {
-       const { error } = await supabase
-         .from('lobbies')
-         .update({ status: 'completed', winner_id: data.winnerId })
-         .eq('id', lobbyId);
+      const { error } = await supabase
+        .from('lobbies')
+        .update({ status: 'completed', winner_id: data.winnerId })
+        .eq('id', lobbyId);
 
-       if (error) throw error;
-       toast.success('Result submitted!');
-       get().fetchLobbyById(lobbyId);
-       return { success: true };
+      if (error) throw error;
+      toast.success('Result submitted!');
+      get().fetchLobbyById(lobbyId);
+      return { success: true };
     } catch (err) {
       toast.error(err.message);
       return { success: false, message: err.message };
     }
-  }
+  },
 }));
 
 export default useLobbyStore;

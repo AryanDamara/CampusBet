@@ -1,8 +1,11 @@
+// Auth store — manages login state globally using Zustand.
+// "persist" saves user/session to localStorage so they stay logged in on refresh.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
+// Converts the raw Supabase profile row into the shape our UI expects
 const mapProfile = (dbProfile) => {
   if (!dbProfile) return null;
   return {
@@ -11,15 +14,15 @@ const mapProfile = (dbProfile) => {
     email: dbProfile.email,
     college: dbProfile.college,
     credits: dbProfile.credits,
+    role: dbProfile.role,
+    avatarUrl: dbProfile.avatar_url,
+    createdAt: dbProfile.created_at,
     stats: {
       matchesPlayed: dbProfile.matches_played || 0,
       matchesWon: dbProfile.matches_won || 0,
       tournamentsPlayed: dbProfile.tournaments_played || 0,
       tournamentsWon: dbProfile.tournaments_won || 0,
     },
-    role: dbProfile.role,
-    avatarUrl: dbProfile.avatar_url,
-    createdAt: dbProfile.created_at
   };
 };
 
@@ -31,6 +34,7 @@ const useAuthStore = create(
       isAuthenticated: false,
       isLoading: false,
 
+      // Sign in with email + password, then fetch the user's profile row
       login: async (email, password) => {
         set({ isLoading: true });
         try {
@@ -53,18 +57,20 @@ const useAuthStore = create(
         }
       },
 
+      // Create a new account. Supabase triggers a DB function to create the profile row.
       signup: async (formData) => {
         set({ isLoading: true });
         try {
           const { data, error } = await supabase.auth.signUp({
             email: formData.email,
             password: formData.password,
-            options: { data: { name: formData.name, college: formData.college } }
+            options: { data: { name: formData.name, college: formData.college } },
           });
           if (error) throw error;
 
-          await new Promise(r => setTimeout(r, 500)); // wait for trigger
-          
+          // Small delay to let the Supabase DB trigger finish creating the profile
+          await new Promise((r) => setTimeout(r, 500));
+
           let profile = null;
           if (data.user) {
             const { data: fetchedProfile } = await supabase
@@ -73,10 +79,10 @@ const useAuthStore = create(
           }
 
           if (data.session) {
-             set({ user: profile, session: data.session, isAuthenticated: true });
-             toast.success('Account created! You got 500 ⚡ starter credits.');
+            set({ user: profile, session: data.session, isAuthenticated: true });
+            toast.success('Account created! You got 500 ⚡ starter credits.');
           } else {
-             toast.success('Registration successful! Please check your email to verify.');
+            toast.success('Registered! Check your email to verify your account.');
           }
           return { success: true };
         } catch (err) {
@@ -87,17 +93,19 @@ const useAuthStore = create(
         }
       },
 
+      // Sign out from Supabase and clear local state
       logout: async () => {
         try { await supabase.auth.signOut(); } catch (err) { console.error(err); }
         set({ user: null, session: null, isAuthenticated: false });
         toast.success('Logged out successfully.');
       },
 
+      // Called on app load — checks if there's a valid session and re-hydrates the user
       loadUser: async () => {
         set({ isLoading: true });
         try {
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          if (sessionError || !session) {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (error || !session) {
             set({ user: null, session: null, isAuthenticated: false });
             return;
           }
@@ -106,7 +114,7 @@ const useAuthStore = create(
             .from('profiles').select('*').eq('id', session.user.id).single();
           if (profileError) throw profileError;
 
-          set({ user: mapProfile(profile), session: session, isAuthenticated: true });
+          set({ user: mapProfile(profile), session, isAuthenticated: true });
         } catch (err) {
           set({ user: null, session: null, isAuthenticated: false });
         } finally {
@@ -114,13 +122,15 @@ const useAuthStore = create(
         }
       },
 
-      updateUser: (updates) => set((state) => ({ user: { ...state.user, ...updates } })),
-      deductCredits: (amount) => set((state) => ({ user: { ...state.user, credits: (state.user?.credits || 0) - amount } })),
-      addCredits: (amount) => set((state) => ({ user: { ...state.user, credits: (state.user?.credits || 0) + amount } })),
+      // Local-only helpers — update state without a DB call
+      updateUser: (updates) => set((s) => ({ user: { ...s.user, ...updates } })),
+      deductCredits: (amount) => set((s) => ({ user: { ...s.user, credits: (s.user?.credits || 0) - amount } })),
+      addCredits: (amount) => set((s) => ({ user: { ...s.user, credits: (s.user?.credits || 0) + amount } })),
     }),
     {
-      name: 'campusbet-auth',
-      partialize: (state) => ({ user: state.user, session: state.session, isAuthenticated: state.isAuthenticated }),
+      name: 'campusbet-auth', // localStorage key
+      // Only persist what's needed; don't store isLoading etc.
+      partialize: (s) => ({ user: s.user, session: s.session, isAuthenticated: s.isAuthenticated }),
     }
   )
 );

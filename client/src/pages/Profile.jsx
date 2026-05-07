@@ -12,6 +12,8 @@ import Input from '../components/ui/Input';
 import StatCard from '../components/dashboard/StatCard';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import { calcWinRate, formatCredits } from '../utils/formatters';
+import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 const BADGE_COLORS = {
   'Campus Champion': 'purple',
@@ -37,10 +39,20 @@ const Profile = () => {
 
   const onSave = async (data) => {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 800)); // mock save
-    updateUser(data);
-    setSaving(false);
-    setEditOpen(false);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ name: data.name, college: data.college })
+        .eq('id', user._id);
+      if (error) throw error;
+      updateUser(data);
+      toast.success('Profile updated!');
+      setEditOpen(false);
+    } catch (err) {
+      toast.error(err.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const stats = user?.stats || {};

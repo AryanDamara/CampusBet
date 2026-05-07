@@ -1,25 +1,22 @@
-/**
- * CampusBet — App Router (unified)
- * Merges Dev1 (auth/landing/UI) + Dev2 (lobbies/tournaments/dashboard/wallet)
- */
+// App.jsx — root component. Sets up routing, the navbar, and toast notifications.
+// On mount it checks for an existing Supabase session so users stay logged in on refresh.
 
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { supabase } from './lib/supabase';
 import useAuthStore from './store/authStore';
 
-// Layout
-import Navbar from './components/layout/Navbar';
+import Navbar        from './components/layout/Navbar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
-// Dev1 pages
+// Public pages
 import Landing  from './pages/Landing';
 import Login    from './pages/Login';
 import Signup   from './pages/Signup';
 import NotFound from './pages/NotFound';
 
-// Dev2 pages
+// Authenticated pages
 import Dashboard        from './pages/Dashboard';
 import BrowseLobbies    from './pages/BrowseLobbies';
 import LobbyDetail      from './pages/LobbyDetail';
@@ -32,11 +29,11 @@ import Wallet           from './pages/Wallet';
 
 const App = () => {
   useEffect(() => {
-    // Initial user load to verify token validity
+    // Restore session from localStorage on first load
     useAuthStore.getState().loadUser();
 
-    // Listen for auth state changes (e.g. login, logout, token refresh across tabs)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Keep state in sync when the user logs in/out in another tab
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         useAuthStore.setState({ user: null, session: null, isAuthenticated: false });
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
@@ -44,14 +41,14 @@ const App = () => {
       }
     });
 
-    return () => {
-      subscription?.unsubscribe();
-    };
+    return () => subscription?.unsubscribe();
   }, []);
+
   return (
     <BrowserRouter>
       <Navbar />
 
+      {/* Global toast notifications (success / error popups) */}
       <Toaster
         position="top-right"
         toastOptions={{
@@ -71,23 +68,23 @@ const App = () => {
       />
 
       <Routes>
-        {/* ── Public ── */}
+        {/* Public — anyone can visit */}
         <Route path="/"       element={<Landing />} />
         <Route path="/login"  element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* ── Authenticated (any user) ── */}
-        <Route path="/dashboard"      element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/lobbies"        element={<ProtectedRoute><BrowseLobbies /></ProtectedRoute>} />
-        <Route path="/lobbies/create" element={<ProtectedRoute><CreateLobby /></ProtectedRoute>} />
-        <Route path="/lobbies/:id"    element={<ProtectedRoute><LobbyDetail /></ProtectedRoute>} />
-        <Route path="/tournaments"    element={<ProtectedRoute><BrowseTournaments /></ProtectedRoute>} />
+        {/* Protected — redirects to /login if not authenticated */}
+        <Route path="/dashboard"       element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/lobbies"         element={<ProtectedRoute><BrowseLobbies /></ProtectedRoute>} />
+        <Route path="/lobbies/create"  element={<ProtectedRoute><CreateLobby /></ProtectedRoute>} />
+        <Route path="/lobbies/:id"     element={<ProtectedRoute><LobbyDetail /></ProtectedRoute>} />
+        <Route path="/tournaments"     element={<ProtectedRoute><BrowseTournaments /></ProtectedRoute>} />
         <Route path="/tournaments/:id" element={<ProtectedRoute><TournamentDetail /></ProtectedRoute>} />
-        <Route path="/leaderboard"    element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-        <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/wallet"         element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+        <Route path="/leaderboard"     element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+        <Route path="/profile"         element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/wallet"          element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
 
-        {/* ── 404 ── */}
+        {/* 404 fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

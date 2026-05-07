@@ -130,19 +130,21 @@ const LobbyDetail = () => {
             <h2 className="font-display font-semibold text-lg mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-purple-400" /> Players
             </h2>
-            <div className="space-y-3">
+          <div className="space-y-3">
               {Array.from({ length: lobby.maxPlayers }, (_, i) => {
-                const playerId = lobby.currentPlayers?.[i];
+                const playerData = lobby.lobby_players?.[i];
+                const playerId = playerData?.user_id;
+                const playerName = playerData?.profiles?.name || playerData?.name;
                 const isMe = playerId === user?._id;
                 const isLobbyHost = playerId === lobby.hostId;
                 return (
                   <div key={i} className={`flex items-center gap-3 p-3 rounded-xl ${playerId ? 'bg-bg-elevated' : 'border border-dashed border-white/10'}`}>
                     {playerId ? (
                       <>
-                        <Avatar user={isMe ? user : { name: `Player ${i + 1}` }} size="sm" />
+                        <Avatar user={isMe ? user : { name: playerName || `Player ${i + 1}` }} size="sm" />
                         <div>
                           <p className="text-sm font-medium text-text-primary">
-                            {isMe ? user?.name : `Player ${i + 1}`}
+                            {isMe ? user?.name : (playerName || `Player ${i + 1}`)}
                             {isLobbyHost && <span className="ml-2 text-xs text-purple-400">(host)</span>}
                           </p>
                         </div>
