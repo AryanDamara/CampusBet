@@ -243,21 +243,19 @@ const useLobbyStore = create((set, get) => ({
       return { success: false, message: err.message };
     }
   },
-  // Delete a lobby — only the host can do this.
-  // We delete lobby_players first to satisfy the FK constraint, then the lobby.
+  // Cancel a lobby — only the host can do this.
+  // Instead of deleting (which can hit RLS/FK constraints if other players joined),
+  // we just mark it cancelled so it drops off the UI.
   deleteLobby: async (lobbyId) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('You must be logged in');
 
-      // Remove all players from the lobby first (FK constraint)
-      await supabase.from('lobby_players').delete().eq('lobby_id', lobbyId);
-
       const { error } = await supabase
         .from('lobbies')
-        .delete()
+        .update({ status: 'cancelled' })
         .eq('id', lobbyId)
-        .eq('host_id', session.user.id); // RLS: only host can delete
+        .eq('host_id', session.user.id); // RLS: only host can cancel
 
       if (error) throw error;
 
