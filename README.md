@@ -8,9 +8,9 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vitejs&logoColor=white)](https://vitejs.dev)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel&logoColor=white)](https://campusarena-sps.vercel.app)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel&logoColor=white)](https://campusarena-nine.vercel.app)
 
-**🔗 Live Demo → [campusarena-sps.vercel.app](https://campusarena-sps.vercel.app)**
+**🔗 Live Demo → [campusarena-nine.vercel.app](https://campusarena-nine.vercel.app)**
 
 </div>
 
