@@ -119,7 +119,6 @@ const useTournamentStore = create((set, get) => ({
           prize_pool: parseInt(formData.prizePool) || 0,
           max_participants: parseInt(formData.maxParticipants) || 16,
           start_date: new Date(formData.startDate).toISOString(),
-          rules: formData.rules?.trim() || null,
           host_id: session.user.id,
           status: 'upcoming',
         })
