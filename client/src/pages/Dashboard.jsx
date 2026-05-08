@@ -3,11 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Gamepad2, Trophy, Zap, Plus, ArrowRight,
-  TrendingUp, Clock, Swords,
+  TrendingUp, Swords,
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import useLobbies from '../hooks/useLobbies';
-import useMyMatches from '../hooks/useMyMatches';
 import StatCard from '../components/dashboard/StatCard';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import LobbyCard from '../components/lobby/LobbyCard';
@@ -17,7 +16,6 @@ import { formatCredits, calcWinRate } from '../utils/formatters';
 const Dashboard = () => {
   const { user } = useAuth();
   const { lobbies, isLoading: isLobbiesLoading, fetchLobbies, joinLobby } = useLobbies();
-  const { matches, isLoading: isMatchesLoading } = useMyMatches();
   const navigate = useNavigate();
 
   useEffect(() => { fetchLobbies(); }, [fetchLobbies]);
@@ -112,18 +110,9 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Activity feed */}
+          {/* Activity feed — self-contained, fetches platform-wide activity */}
           <div className="space-y-4">
-            <h2 className="font-display text-lg font-semibold flex items-center gap-2">
-              <Clock className="w-5 h-5 text-cyan-400" /> Recent Activity
-            </h2>
-            <div className="bg-bg-card border border-white/5 rounded-xl p-4">
-              {isMatchesLoading ? (
-                <div className="flex justify-center py-6"><div className="w-6 h-6 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" /></div>
-              ) : (
-                <ActivityFeed matches={matches} />
-              )}
-            </div>
+            <ActivityFeed />
 
             {/* Quick actions */}
             <div className="bg-bg-card border border-white/5 rounded-xl p-4 space-y-2">
