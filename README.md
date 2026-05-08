@@ -196,4 +196,5 @@ To deploy:
 ## Contributors
 
 - **Shaurya Pratap Singh** — primary frontend development, architecture, and project integration
+- **Aujasya Rajput** — project contribution and collaboration
 - **Aryan Singh Damara** — code contributions present in repository history
