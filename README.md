@@ -1,144 +1,199 @@
 <div align="center">
 
-# ⚡ CampusBet
+# CampusBet
 
-**Frontend-first campus gaming platform — create lobbies, host tournaments, track virtual credits, and view a live leaderboard with Supabase data.**
+**A frontend-first campus gaming platform for lobbies, tournaments, virtual credits, and leaderboard tracking.**
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel&logoColor=white)](https://campus-bet.vercel.app)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vitejs&logoColor=white)](https://vitejs.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
 </div>
 
----
+## Overview
 
-## What is CampusBet?
+CampusBet is a college-focused competitive gaming platform where students can:
 
-CampusBet is a campus-exclusive competitive gaming platform where students challenge each other to skill-based matches and stake **virtual campus credits** (no real money involved). A college email is required to sign up, keeping the community within your campus.
+- create and join game lobbies
+- host and register for tournaments
+- track virtual campus credits
+- view leaderboard standings based on match results
+- manage their profile and match activity
 
-**Core features:**
-- 🎮 **Lobbies** — create or join 1v1 / 2v2 / squad match rooms with a credit bid
-- 🏆 **Tournaments** — browse, host, and join single-elimination events
-- 📊 **Leaderboard** — live rankings sorted by wins across all players
-- 💳 **Wallet** — real-time credit balance and full match transaction history
-- 👤 **Profile** — editable display name, college, and lifetime stats
+The project is intentionally **frontend-first** and built to be easy to understand, explain, and demo.
 
----
+## Core Features
+
+### 1. Lobbies
+- Create match rooms for games like Valorant, Chess, FIFA, BGMI, and more
+- Support for 1v1, 2v2, and squad-style setups
+- Join open lobbies and move them into active play when full
+- Submit results to update stats and credits
+
+### 2. Tournaments
+- Browse available tournaments
+- Host new tournaments through a dedicated React form flow
+- Register participants for upcoming tournaments
+- View tournament overview, bracket placeholder, and participant list
+
+### 3. Wallet
+- Track virtual credit balance
+- View credit gains and losses from completed matches
+- Keep match-based transaction history in one place
+
+### 4. Leaderboard
+- Rank players using completed match data
+- Filter standings by time period and game
+- Show podium and full ranking table
+
+### 5. Profile
+- Edit display name and college
+- View account information and match history
+- Track wins, matches played, and win rate
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite 8, Tailwind CSS 3 |
-| State Management | Zustand (with localStorage persistence) |
-| Database & Auth | Supabase (PostgreSQL + Row-Level Security) |
-| Animations | Framer Motion |
+| Frontend | React 19, Vite 8 |
+| Styling | Tailwind CSS 3 |
+| State Management | Zustand |
 | Forms | React Hook Form |
+| Database & Auth | Supabase |
+| Animations | Framer Motion |
 | Deployment | Vercel |
 
-**Architecture:** Pure frontend SPA — no custom backend server. The app calls Supabase directly from the browser via the Supabase JS client. The frontend handles page state, form flows, and display logic, while Supabase stores auth and app data.
+## Architecture
 
----
+CampusBet uses a **pure frontend SPA architecture**.
+
+- React handles routing and UI rendering
+- Zustand stores manage state and app actions
+- Supabase provides authentication and persistent data storage
+- The browser communicates directly with Supabase
+
+This keeps the codebase simple for learning, presentations, and fast iteration.
 
 ## Project Structure
 
-```
+```bash
 CampusBet/
-└── client/                    # React + Vite application
-    ├── public/                # Static assets (favicon, etc.)
+├── README.md
+├── TEACHER_GUIDE.md
+└── client/
+    ├── public/
     └── src/
-        ├── lib/
-        │   └── supabase.js    # Supabase client (single shared instance)
-        ├── store/
-        │   ├── authStore.js   # Zustand: login, signup, session persistence
-        │   ├── lobbyStore.js  # Zustand: lobby CRUD + join/leave actions
-        │   └── tournamentStore.js  # Zustand: tournament CRUD + registration
+        ├── components/
         ├── hooks/
-        │   ├── useAuth.js     # Thin wrapper around authStore
-        │   ├── useMyMatches.js # Fetches current user's completed match history
-        │   └── useLobbies.js  # Convenience hook for lobby store selectors
-        ├── pages/             # One file per route
-        ├── components/        # Shared UI components (Button, Modal, Navbar…)
+        ├── lib/
+        ├── pages/
+        ├── store/
         └── utils/
-            ├── constants.js   # App-wide constants (game list, routes, etc.)
-            └── formatters.js  # Credit formatting, time helpers, win-rate calc
 ```
 
----
+## Important Frontend Modules
 
-## Database Schema (Supabase)
+- `client/src/App.jsx`
+  Main route setup and lazy-loaded page wiring
 
+- `client/src/store/authStore.js`
+  Authentication flow, user loading, and session persistence
+
+- `client/src/store/lobbyStore.js`
+  Lobby fetching, creation, join flow, and result submission
+
+- `client/src/store/tournamentStore.js`
+  Tournament fetching, creation, and registration
+
+- `client/src/hooks/useMyMatches.js`
+  Builds user match history from completed lobbies
+
+- `client/src/pages/CreateLobby.jsx`
+  Multi-step lobby creation flow
+
+- `client/src/pages/CreateTournament.jsx`
+  Tournament host flow
+
+## Database Model
+
+The frontend expects these main Supabase tables:
+
+```text
+profiles
+lobbies
+lobby_players
+tournaments
+tournament_participants
 ```
-profiles            → one row per user (extends Supabase auth.users)
-lobbies             → match rooms (game, bid_amount, status, winner_id)
-lobby_players       → join table: users ↔ lobbies
-tournaments         → tournament events (format, prize_pool, start/end date)
-tournament_participants → join table: users ↔ tournaments
-```
 
-A Supabase database trigger automatically creates a `profiles` row whenever a new user signs up via `supabase.auth.signUp()`.
+Typical usage:
 
----
+- `profiles` stores user information and stats
+- `lobbies` stores match rooms
+- `lobby_players` links users to lobbies
+- `tournaments` stores tournament metadata
+- `tournament_participants` links users to tournaments
 
-## Getting Started (Local Development)
+## Local Development
 
-**Prerequisites:** Node.js 18+, a free [Supabase](https://supabase.com) project.
+### Prerequisites
+
+- Node.js 18+
+- npm
+- A Supabase project
+
+### Setup
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/sps-exe/CampusBet.git
 cd CampusBet/client
-
-# 2. Set up environment variables
-cp .env.example .env.local
-# Edit .env.local and fill in your Supabase URL and anon key
-
-# 3. Install dependencies and run
 npm install
-npm run dev
-# App runs at http://localhost:5173
 ```
 
-### Environment variables
+Create a `.env.local` file in `client/`:
 
 ```env
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-here
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-Both values are found in your Supabase dashboard under **Project Settings → API**.
+Run the development server:
 
----
+```bash
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Lint the frontend:
+
+```bash
+npm run lint
+```
 
 ## Deployment
 
-The project is deployed on [Vercel](https://vercel.com). The `client/vercel.json` configures the SPA rewrite so direct URL navigation works correctly.
+The project is configured for deployment on Vercel.
 
-To deploy your own instance:
-1. Fork this repo
-2. Import the `client/` folder into Vercel
-3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables in the Vercel dashboard
-4. Deploy — Vercel auto-detects Vite
+To deploy:
 
----
-
-## Key Design Decisions
-
-**Why Supabase directly (no Express backend)?**
-Supabase provides auth and database storage out of the box. For a student project, this keeps the app easier to understand because the main logic stays inside the React frontend instead of being split across frontend and backend services.
-
-**Why Zustand instead of Redux or Context?**
-Zustand is minimal — no boilerplate, no providers. The `persist` middleware handles localStorage session persistence in two lines. It scales well for a project of this size.
-
-**Why virtual credits (no real money)?**
-Compliance. Real-money wagering between students would require gaming licenses. Campus credits are a virtual unit of score with no monetary value, making this a social skill-game platform.
-
----
+1. Import the `client/` app into Vercel
+2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+3. Deploy normally as a Vite project
 
 ## Notes
 
-- This repo is intentionally frontend-first and classroom-friendly.
-- Most app behavior lives in React pages, hooks, and Zustand stores.
-- GitHub shows the language as JavaScript because React components here are written in `.js` / `.jsx` files.
+- CampusBet uses **virtual credits only**
+- No real money is involved
+- GitHub shows the main language as **JavaScript** because React components are written in `.js` and `.jsx` files
+
+## Contributors
+
+- **Shaurya Pratap Singh** — primary frontend development, architecture, and project integration
+- **Aryan Singh Damara** — code contributions present in repository history
