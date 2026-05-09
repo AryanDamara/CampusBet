@@ -39,6 +39,8 @@ A GitHub Pages presentation is included for project review and classroom demos:
 
 It covers the prototype overview, architecture, tech stack, feature walkthrough, mock individual contribution split, database model, demo flow, and future scope while matching the project’s dark purple/cyan gaming UI.
 
+If the live link is not active yet, enable GitHub Pages in repo settings with either **Deploy from a branch → `gh-pages` / root** or **Deploy from a branch → `main` / `docs`**.
+
 ## Stack
 
 `React 19` · `Vite` · `Tailwind CSS` · `Zustand` · `Supabase (Auth + PostgreSQL)` · `Framer Motion` · `React Hook Form`
