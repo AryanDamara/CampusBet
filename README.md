@@ -12,6 +12,8 @@
 
 **🔗 Live Demo → [campusarena-nine.vercel.app](https://campusarena-nine.vercel.app)**
 
+[Project Presentation](https://sps-exe.github.io/CampusArena/) · [Presentation Source](docs/index.html)
+
 </div>
 
 ---
@@ -27,6 +29,15 @@ CampusArena is a college-exclusive competitive gaming platform. Students challen
 | 📊 **Leaderboard** | Live rankings sorted by wins, filterable by game |
 | 💳 **Wallet** | Real-time credit balance + full match transaction history |
 | 👤 **Profile** | Edit name, college, view lifetime stats |
+
+## HTML Presentation
+
+A GitHub Pages presentation is included for project review and classroom demos:
+
+- **Live presentation:** https://sps-exe.github.io/CampusArena/
+- **Source file:** [`docs/index.html`](docs/index.html)
+
+It covers the prototype overview, architecture, tech stack, feature walkthrough, mock individual contribution split, database model, demo flow, and future scope while matching the project’s dark purple/cyan gaming UI.
 
 ## Stack
 
