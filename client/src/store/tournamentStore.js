@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import useAuthStore from './authStore';
 
 // Converts a raw Supabase tournament row into the shape the UI expects
 const mapTournament = (dbTourney) => {
@@ -146,6 +147,7 @@ const useTournamentStore = create((set, get) => ({
         const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single();
         if (profile) {
           await supabase.from('profiles').update({ credits: profile.credits - prizePoolAmt }).eq('id', session.user.id);
+          await useAuthStore.getState().loadUser();
         }
       }
 
@@ -206,6 +208,7 @@ const useTournamentStore = create((set, get) => ({
         const { data: profile } = await supabase.from('profiles').select('credits').eq('id', session.user.id).single();
         if (profile) {
           await supabase.from('profiles').update({ credits: profile.credits - entryFee }).eq('id', session.user.id);
+          await useAuthStore.getState().loadUser();
         }
       }
 
