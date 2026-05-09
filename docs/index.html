@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CampusBet Prototype Presentation</title>
-  <meta name="description" content="CampusBet prototype overview, architecture, tech stack, features, contributions, and future scope." />
+  <title>CampusArena Prototype Presentation</title>
+  <meta name="description" content="CampusArena prototype overview, architecture, tech stack, features, contributions, and future scope." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -16,8 +16,10 @@
       --bg-elevated: #1c1c27;
       --purple: #8b5cf6;
       --purple-soft: #a78bfa;
+      --magenta: #ec4899;
       --cyan: #06b6d4;
       --cyan-soft: #22d3ee;
+      --lime: #a3e635;
       --success: #10b981;
       --warning: #f59e0b;
       --text: #f4f4f5;
@@ -25,6 +27,7 @@
       --text-muted: #52525b;
       --border: rgba(255,255,255,0.08);
       --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-elevated: 0 24px 70px rgba(0,0,0,0.44);
       --shadow-purple: 0 0 20px rgba(139,92,246,0.38);
       --shadow-cyan: 0 0 20px rgba(6,182,212,0.32);
     }
@@ -35,6 +38,7 @@
 
     html {
       scroll-behavior: smooth;
+      scroll-snap-type: y proximity;
     }
 
     body {
@@ -44,6 +48,7 @@
       background:
         radial-gradient(circle at 18% 8%, rgba(139,92,246,0.22), transparent 28rem),
         radial-gradient(circle at 88% 12%, rgba(6,182,212,0.18), transparent 25rem),
+        radial-gradient(circle at 52% 42%, rgba(236,72,153,0.08), transparent 34rem),
         linear-gradient(135deg, #0a0a0f 0%, #13101f 50%, #0a0f1a 100%);
       min-height: 100vh;
       overflow-x: hidden;
@@ -91,7 +96,7 @@
 
     .topbar {
       position: sticky;
-      top: 16px;
+      top: 18px;
       z-index: 20;
       display: flex;
       align-items: center;
@@ -102,7 +107,7 @@
       border-radius: 14px;
       background: rgba(10,10,15,0.78);
       backdrop-filter: blur(18px);
-      box-shadow: var(--shadow-card);
+      box-shadow: var(--shadow-elevated);
     }
 
     .brand {
@@ -123,6 +128,34 @@
       border-radius: 10px;
       background: linear-gradient(135deg, var(--purple), var(--cyan));
       box-shadow: var(--shadow-purple);
+    }
+
+    .deck-status {
+      min-width: 132px;
+      display: grid;
+      gap: 7px;
+      color: var(--text-secondary);
+      font-family: "Space Grotesk", Inter, sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .progress-rail {
+      height: 5px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.09);
+    }
+
+    .progress-rail span {
+      display: block;
+      width: 10%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--purple), var(--magenta), var(--cyan));
+      box-shadow: var(--shadow-cyan);
+      transition: width 220ms ease;
     }
 
     .gradient-text {
@@ -156,14 +189,22 @@
       border-color: var(--border);
     }
 
+    .nav a.active {
+      color: var(--text);
+      border-color: rgba(34,211,238,0.32);
+      background: rgba(34,211,238,0.10);
+      box-shadow: inset 0 0 0 1px rgba(139,92,246,0.12);
+    }
+
     .slide {
-      min-height: min(820px, calc(100vh - 44px));
+      min-height: calc(100vh - 32px);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 26px;
-      padding: 70px 0;
+      gap: 24px;
+      padding: 56px 0;
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      scroll-snap-align: start;
     }
 
     .slide:last-child {
@@ -201,7 +242,7 @@
 
     .hero h1 {
       max-width: 760px;
-      font-size: clamp(48px, 8vw, 104px);
+      font-size: clamp(44px, 6.8vw, 86px);
       line-height: 0.95;
       font-weight: 800;
     }
@@ -246,11 +287,13 @@
     .glass-card {
       position: relative;
       overflow: hidden;
-      background: rgba(22,22,31,0.84);
-      border: 1px solid var(--border);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02)),
+        rgba(22,22,31,0.84);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 18px;
-      box-shadow: var(--shadow-card);
-      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-elevated);
+      backdrop-filter: blur(14px);
     }
 
     .glass-card::before {
@@ -300,6 +343,17 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 14px;
       padding: 16px;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.18);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .feature-tile:hover,
+    .stack-tile:hover,
+    .contribution:hover,
+    .scope-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(34,211,238,0.28);
+      background: rgba(33,33,48,0.86);
     }
 
     .mini-stat span,
@@ -381,6 +435,7 @@
       border: 1px solid rgba(139,92,246,0.24);
       color: var(--purple-soft);
       font-weight: 900;
+      box-shadow: inset 0 0 22px rgba(139,92,246,0.10);
     }
 
     .feature-tile h3,
@@ -416,9 +471,11 @@
       text-align: center;
       padding: 22px;
       border-radius: 18px;
-      background: rgba(22,22,31,0.88);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-card);
+      background:
+        linear-gradient(145deg, rgba(139,92,246,0.12), rgba(6,182,212,0.06)),
+        rgba(22,22,31,0.88);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow-elevated);
     }
 
     .arch-arrow {
@@ -523,6 +580,7 @@
       bottom: 18px;
       z-index: 25;
       display: flex;
+      align-items: center;
       gap: 8px;
       padding: 8px;
       border-radius: 14px;
@@ -539,12 +597,23 @@
       border-radius: 10px;
       color: var(--text);
       background: rgba(255,255,255,0.07);
+      font-size: 18px;
       font-weight: 900;
       cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease;
     }
 
     .deck-controls button:hover {
       background: linear-gradient(90deg, var(--purple), var(--cyan));
+      transform: translateY(-1px);
+    }
+
+    .shortcut-hint {
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 0 4px;
+      white-space: nowrap;
     }
 
     @media (max-width: 900px) {
@@ -556,6 +625,12 @@
 
       .nav {
         justify-content: flex-start;
+      }
+
+      .deck-status {
+        width: 100%;
+        min-width: 0;
+        text-align: left;
       }
 
       .hero,
@@ -574,6 +649,27 @@
       .slide {
         min-height: auto;
         padding: 52px 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .deck-shell {
+        width: min(100% - 24px, 1180px);
+        padding-top: 14px;
+      }
+
+      .hero h1 {
+        font-size: clamp(38px, 13vw, 56px);
+      }
+
+      .section-title h2 {
+        font-size: clamp(31px, 10vw, 46px);
+      }
+
+      .deck-controls {
+        left: 12px;
+        right: 12px;
+        justify-content: center;
       }
     }
 
@@ -597,9 +693,9 @@
 <body>
   <div class="deck-shell">
     <header class="topbar" aria-label="Presentation navigation">
-      <a class="brand" href="#cover" aria-label="CampusBet presentation cover">
+      <a class="brand" href="#cover" aria-label="CampusArena presentation cover">
         <span class="brand-mark">⚡</span>
-        <span class="gradient-text">CampusBet</span>
+        <span class="gradient-text">CampusArena</span>
       </a>
       <nav class="nav">
         <a href="#overview">Overview</a>
@@ -609,6 +705,10 @@
         <a href="#contributions">Contributions</a>
         <a href="#future">Future Scope</a>
       </nav>
+      <div class="deck-status" aria-live="polite">
+        <span id="slideCount">01 / 10</span>
+        <div class="progress-rail" aria-hidden="true"><span id="progressFill"></span></div>
+      </div>
     </header>
 
     <main>
@@ -616,17 +716,17 @@
         <div>
           <span class="eyebrow"><span class="live-dot"></span> Prototype presentation</span>
           <h1>Campus gaming, virtual credits, and skill-based competition.</h1>
-          <p class="lead">CampusBet is a React + Supabase prototype where students create lobbies, host tournaments, track virtual credits, and climb a campus leaderboard without real-money wagering.</p>
+          <p class="lead">CampusArena is a React + Supabase prototype where students create lobbies, host tournaments, track virtual credits, and climb a campus leaderboard without real-money wagering.</p>
           <div class="hero-actions">
             <a class="button primary" href="#overview">Start presentation</a>
             <a class="button" href="../README.md">Read project README</a>
           </div>
         </div>
 
-        <aside class="glass-card product-card" aria-label="CampusBet dashboard preview">
+        <aside class="glass-card product-card" aria-label="CampusArena dashboard preview">
           <div class="mini-app">
             <div class="mini-nav">
-              <strong class="gradient-text">CampusBet Dashboard</strong>
+              <strong class="gradient-text">CampusArena Dashboard</strong>
               <span class="pill">500 credits</span>
             </div>
             <div class="mini-stat-grid">
@@ -654,7 +754,7 @@
         <div class="section-title">
           <span class="eyebrow"><span class="live-dot"></span> Project overview</span>
           <h2>What the prototype solves</h2>
-          <p class="lead">CampusBet turns informal campus game challenges into structured match rooms, tournaments, wallet activity, and rankings. It is designed as a classroom-friendly, frontend-first prototype.</p>
+          <p class="lead">CampusArena turns informal campus game challenges into structured match rooms, tournaments, wallet activity, and rankings. It is designed as a classroom-friendly, frontend-first prototype.</p>
         </div>
         <div class="grid-3">
           <article class="feature-tile">
@@ -779,8 +879,8 @@
           </article>
           <article class="stack-tile">
             <span class="label">Deployment</span>
-            <h3>Vercel + GitHub Pages</h3>
-            <p>The app is deployed as a Vite SPA on Vercel. This presentation is hosted as static GitHub Pages documentation.</p>
+            <h3>Vercel + static HTML</h3>
+            <p>The app is deployed as a Vite SPA on Vercel. This presentation is committed as a static HTML file in the docs folder.</p>
             <div class="pill-list"><span class="pill">SPA rewrite</span><span class="pill">Static docs</span><span class="pill">README link</span></div>
           </article>
         </div>
@@ -824,7 +924,7 @@
         <div class="timeline">
           <article class="timeline-item">
             <div class="step-num">1</div>
-            <div><h3>Start from landing</h3><p>Explain that CampusBet is college-gated and uses campus credits only.</p></div>
+            <div><h3>Start from landing</h3><p>Explain that CampusArena is college-gated and uses campus credits only.</p></div>
           </article>
           <article class="timeline-item">
             <div class="step-num">2</div>
@@ -907,7 +1007,7 @@
       <section class="slide" id="closing">
         <div class="section-title">
           <span class="eyebrow"><span class="live-dot"></span> Closing summary</span>
-          <h2>CampusBet proves the full loop: challenge, compete, score, rank.</h2>
+          <h2>CampusArena proves the full loop: challenge, compete, score, rank.</h2>
           <p class="lead">The prototype demonstrates a practical frontend-first architecture, a safe virtual-credit game economy, and a complete set of student-facing workflows suitable for a capstone demo.</p>
         </div>
         <div class="button-row">
@@ -915,35 +1015,76 @@
           <a class="button" href="https://campusarena-nine.vercel.app">Open live app</a>
           <a class="button" href="https://github.com/sps-exe/CampusArena">Open GitHub repo</a>
         </div>
-        <p class="footer-note">Prepared as a static HTML presentation for GitHub Pages. Content is based on the current repository structure and can be edited directly in <code>docs/index.html</code>.</p>
+        <p class="footer-note">Prepared as a committed static HTML presentation. Content is based on the current repository structure and can be edited directly in <code>docs/index.html</code>.</p>
       </section>
     </main>
   </div>
 
   <div class="deck-controls" aria-label="Slide controls">
-    <button type="button" id="prevSlide" aria-label="Previous slide">↑</button>
-    <button type="button" id="nextSlide" aria-label="Next slide">↓</button>
+    <button type="button" id="prevSlide" aria-label="Previous slide">←</button>
+    <span class="shortcut-hint">Use ← / →</span>
+    <button type="button" id="nextSlide" aria-label="Next slide">→</button>
   </div>
 
   <script>
     const slides = Array.from(document.querySelectorAll('.slide'));
+    const navLinks = Array.from(document.querySelectorAll('.nav a'));
+    const slideCount = document.getElementById('slideCount');
+    const progressFill = document.getElementById('progressFill');
+    const formatIndex = (number) => String(number).padStart(2, '0');
     const currentSlideIndex = () => {
-      const y = window.scrollY + window.innerHeight * 0.38;
-      return Math.max(0, slides.findIndex((slide, index) => {
-        const next = slides[index + 1];
-        return y >= slide.offsetTop && (!next || y < next.offsetTop);
-      }));
+      const focusLine = window.innerHeight * 0.42;
+      let activeIndex = 0;
+      let closestDistance = Number.POSITIVE_INFINITY;
+      slides.forEach((slide, index) => {
+        const rect = slide.getBoundingClientRect();
+        if (rect.top <= focusLine && rect.bottom >= focusLine) {
+          activeIndex = index;
+          closestDistance = 0;
+          return;
+        }
+        const distance = Math.min(Math.abs(rect.top - focusLine), Math.abs(rect.bottom - focusLine));
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          activeIndex = index;
+        }
+      });
+      return activeIndex;
+    };
+    const updateDeckState = (forcedIndex) => {
+      const index = Number.isInteger(forcedIndex) ? forcedIndex : currentSlideIndex();
+      const activeSlide = slides[index];
+      slideCount.textContent = `${formatIndex(index + 1)} / ${formatIndex(slides.length)}`;
+      progressFill.style.width = `${((index + 1) / slides.length) * 100}%`;
+      navLinks.forEach((link) => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${activeSlide.id}`);
+      });
     };
     const goToSlide = (offset) => {
       const nextIndex = Math.min(slides.length - 1, Math.max(0, currentSlideIndex() + offset));
       slides[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.replaceState(null, '', `#${slides[nextIndex].id}`);
+      updateDeckState(nextIndex);
+      window.setTimeout(updateDeckState, 280);
     };
     document.getElementById('prevSlide').addEventListener('click', () => goToSlide(-1));
     document.getElementById('nextSlide').addEventListener('click', () => goToSlide(1));
     window.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowDown' || event.key === 'PageDown') goToSlide(1);
-      if (event.key === 'ArrowUp' || event.key === 'PageUp') goToSlide(-1);
+      const nextKeys = ['ArrowRight', 'ArrowDown', 'PageDown', ' '];
+      const previousKeys = ['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'];
+      if (nextKeys.includes(event.key)) {
+        event.preventDefault();
+        goToSlide(1);
+      }
+      if (previousKeys.includes(event.key)) {
+        event.preventDefault();
+        goToSlide(-1);
+      }
     });
+    window.addEventListener('scroll', updateDeckState, { passive: true });
+    window.addEventListener('resize', updateDeckState);
+    window.addEventListener('hashchange', updateDeckState);
+    updateDeckState();
   </script>
 </body>
 </html>
